@@ -5,23 +5,32 @@ import os
 
 app = Flask(__name__)
 
+### see also https://gist.github.com/ib-lundgren/6507798
 
-# This information is obtained upon registration of a new GitHub
-client_id = "<your client key>"
-client_secret = "<your client secret>"
-authorization_base_url = 'https://github.com/login/oauth/authorize'
-token_url = 'https://github.com/login/oauth/access_token'
+# This information is obtained upon registration of a new Eccube
+client_id = "<client id>"
+client_secret = "<client secret>"
+authorization_base_url = 'https://<eccube-host>/admin/OAuth2/v0/authorize'
+token_url = 'https://<eccube-host>/OAuth2/v0/token'
+api_url = 'https://<eccube-host>/v0/productsauthsample/1'
+scope = [
+    "read",
+    "write"
+]
+redirect_uri = 'http://127.0.0.1:5000/callback';
 
+## for http
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def demo():
     """Step 1: User Authorization.
 
-    Redirect the user/resource owner to the OAuth provider (i.e. Github)
+    Redirect the user/resource owner to the OAuth provider (i.e. Eccube)
     using an URL with a few key OAuth parameters.
     """
-    github = OAuth2Session(client_id)
-    authorization_url, state = github.authorization_url(authorization_base_url)
+    eccube = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
+    authorization_url, state = eccube.authorization_url(authorization_base_url)
 
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
@@ -39,8 +48,9 @@ def callback():
     in the redirect URL. We will use that to obtain an access token.
     """
 
-    github = OAuth2Session(client_id, state=session['oauth_state'])
-    token = github.fetch_token(token_url, client_secret=client_secret,
+    eccube = OAuth2Session(client_id, state=session['oauth_state'],
+                           redirect_uri=redirect_uri)
+    token = eccube.fetch_token(token_url, client_secret=client_secret,
                                authorization_response=request.url)
 
     # At this point you can fetch protected resources but lets save
@@ -55,8 +65,9 @@ def callback():
 def profile():
     """Fetching a protected resource using an OAuth 2 token.
     """
-    github = OAuth2Session(client_id, token=session['oauth_token'])
-    return jsonify(github.get('https://api.github.com/user').json())
+    eccube = OAuth2Session(client_id, token=session['oauth_token'],
+                           redirect_uri=redirect_uri)
+    return jsonify(eccube.get(api_url).json())
 
 
 if __name__ == "__main__":
