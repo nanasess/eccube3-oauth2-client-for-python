@@ -20,7 +20,7 @@ scope = [
 redirect_uri = 'http://127.0.0.1:5000/callback';
 
 ## for http
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def demo():
