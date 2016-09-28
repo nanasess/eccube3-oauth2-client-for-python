@@ -12,10 +12,11 @@ client_id = "<client id>"
 client_secret = "<client secret>"
 authorization_base_url = 'https://<eccube-host>/admin/OAuth2/v0/authorize'
 token_url = 'https://<eccube-host>/OAuth2/v0/token'
-api_url = 'https://<eccube-host>/v0/productsauthsample/1'
+api_url = 'https://<eccube-host>/api/v0/product/1'
+
 scope = [
-    "read",
-    "write"
+    "product_read",
+    "product_write"
 ]
 redirect_uri = 'http://127.0.0.1:5000/callback';
 
@@ -55,14 +56,14 @@ def callback():
 
     # At this point you can fetch protected resources but lets save
     # the token and show how this is done from a persisted token
-    # in /profile.
+    # in /product.
     session['oauth_token'] = token
 
-    return redirect(url_for('.profile'))
+    return redirect(url_for('.product'))
 
 
-@app.route("/profile", methods=["GET"])
-def profile():
+@app.route("/product", methods=["GET"])
+def product():
     """Fetching a protected resource using an OAuth 2 token.
     """
     eccube = OAuth2Session(client_id, token=session['oauth_token'],
